@@ -1,0 +1,22 @@
+# Commit format: type(scope): concise imperative summary
+# Keep the subject under 72 characters and omit the trailing period.
+# Examples:
+#   feat(tiptabs): add health check endpoint
+#   fix(docker): correct container startup command
+#   ci(tiptabs): validate Docker image health
+
+# Types: feat, fix, docs, refactor, test, ci, chore
+# Use a focused lowercase scope when it adds useful context.
+
+type(scope): summary
+
+Why:
+- 
+
+Changes:
+- 
+
+Testing:
+- 
+
+# Remove empty sections and instructional comments before committing.
