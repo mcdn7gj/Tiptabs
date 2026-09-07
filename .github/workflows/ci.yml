@@ -52,14 +52,15 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          load: true
           push: false
-          tags: tiptabs:latest
+          tags: tiptabs:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Verify
         run: |
-          docker run --rm -d --name tiptabs-test -p 5000:5000 tiptabs:latest
+          docker run --rm -d --name tiptabs-test -p 5000:5000 tiptabs:test
           sleep 5
           curl -f http://localhost:5000/health
           docker stop tiptabs-test
