@@ -5,14 +5,10 @@ setup(
     version="1.0.0",
     packages=["Tiptabs"],
     install_requires=[
-        "Flask>=0.12.3",
-        "Flask-API>=0.7.1",
-        "Jinja2>=2.9.6",
-        "requests>=2.20.0",
-        "MySQL-connector-python>=8.0.33",
-        "python-dotenv>=0.10.1",
-        "boto3>=1.9.119",
-        "gunicorn>=19.9.0"
+        "Flask>=3.1.3,<4",
+        "requests>=2.32.5,<3",
+        "python-dotenv>=1.2.1,<2",
+        "gunicorn>=19.9.0",
     ],
     url="https://github.com/mcdonagj/Tiptabs",
     license="MIT",

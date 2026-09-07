@@ -1,4 +1,3 @@
-
 # Install OS environment.
 FROM python:3.11-slim
 LABEL name="tiptabs"
@@ -7,11 +6,9 @@ LABEL description="Python web application that simplifies conversions between es
 
 # Install system dependencies
 RUN apt-get update && \
-  apt-get install -y git nodejs npm && \
+  apt-get install -y git && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g angular-material
 
 # Upgrade pip, setuptools, and wheel.
 RUN pip install --upgrade pip setuptools wheel
@@ -27,9 +24,6 @@ RUN pip3 install -e .
 
 # Expose port for Flask.
 EXPOSE 5000
-
-# Expose port for MySQL Server.
-EXPOSE 3006
 
 # Run main.py.
 CMD ["tiptabs"]

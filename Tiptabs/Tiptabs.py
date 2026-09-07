@@ -1,21 +1,29 @@
-from Tiptabs.DictionaryBuilder import *
+from decimal import Decimal, InvalidOperation
+
+from Tiptabs.validation import (
+    check_valid_currency_key,
+    check_valid_currency_value,
+    format_base,
+)
+from Tiptabs.ForexErrors import ForexError
+
 
 class Tiptabs:
 
-    def __init__(self, desired_base, desired_dictionary):
+    def __init__(self, desired_base, forex_service=None):
         """
-        __init__(self, str, DictionaryBuilder): Constructor for creating a Tiptabs object.
+        __init__(self, str, ForexService): Constructor for creating a Tiptabs object.
         :param desired_base: Desired currency base.
-        :param desired_dictionary: Constructed dictionary with available bases and rates for a given day.
+        :param forex_service: ForexService instance for currency conversion.
         """
 
-        self.dictionary_builder = desired_dictionary
+        self.forex_service = forex_service
         chk_base_size = len(desired_base) >= 0
 
         if not chk_base_size:
             self.base = "EUR"
         else:
-            base_available = desired_dictionary.check_available_bases(desired_base)
+            base_available = self._currency_available(desired_base)
             self.base = desired_base if base_available else "EUR"
 
         self.amount = 0.00
@@ -33,7 +41,7 @@ class Tiptabs:
         :param desired_base: Base to set within the calculator.
         :return: Boolean condition that indicates the success of setting the desired base.
         """
-        available_base = self.dictionary_builder.check_available_bases(desired_base)
+        available_base = self._currency_available(desired_base)
 
         set_base_res = [False, "Desired base of {!s} is not available.\n Default base of EUR assigned.".format(str(desired_base))]
 
@@ -53,10 +61,10 @@ class Tiptabs:
         :param desired_amount: Bill amount to be converted.
         """
 
-        valid_amount = (desired_amount and self.dictionary_builder.check_valid_currency_value(desired_amount)[0] and not float(
+        valid_amount = (desired_amount and check_valid_currency_value(desired_amount)[0] and not float(
                 desired_amount) <= 0.000000)
 
-        self.amount = float(desired_amount) if valid_amount else 0.00        
+        self.amount = float(desired_amount) if valid_amount else 0.00
 
     def get_amount(self):
         """
@@ -82,7 +90,7 @@ class Tiptabs:
                 empty_item_resp = "ERROR: NoneTypes are not accepted for {!s}s.".format(cond[index])
                 return [False, empty_item_resp]
 
-            valid_item = self.dictionary_builder.check_valid_currency_key(item) if index == 2 else self.dictionary_builder.check_valid_currency_value(item)
+            valid_item = self._valid_currency_key(item) if index == 2 else self._valid_currency_value(item)
             if not valid_item[0]:
                 invalid_item_result = "ERROR: '{!s}' is not valid input for a {!s}.".format(str(item), cond[index])
                 return [False, invalid_item_result]
@@ -93,17 +101,38 @@ class Tiptabs:
 
         fixed_converted_currency = str(converted_currency).replace('string:', '')
 
-        valid_input_currency = self.dictionary_builder.check_available_bases(fixed_converted_currency)
+        valid_input_currency = self._currency_available(fixed_converted_currency)
 
         if not valid_input_currency:
             invalid_input_resp = "Your desired currency base of {!s} is not available in the calculator.".format(str(fixed_converted_currency))
             return [False, invalid_input_resp]
 
-        convert_currency_rate = self.dictionary_builder.currencies.get(fixed_converted_currency, 1)
-
-        final_amount = (bill_amt + tip_amount) * float(convert_currency_rate)
+        total_amount = bill_amt + tip_amount
+        if self.forex_service is not None:
+            try:
+                final_amount = self.forex_service.convert(
+                    total_amount,
+                    self.base,
+                    fixed_converted_currency,
+                )
+            except ForexError as error:
+                return [False, "ERROR: Currency conversion is unavailable: {!s}".format(error)]
+        else:
+            raise ForexError("No forex service configured")
 
         final_amt_resp = "Your total amount was: {!s} {!s}.".format(final_amount, fixed_converted_currency)
         calc_total_resp = [True, final_amt_resp]
 
         return calc_total_resp
+
+    def _currency_available(self, currency):
+        if self.forex_service is not None:
+            value = str(currency).strip() if currency is not None else ""
+            return len(value) == 3 and value.isalpha()
+        return False
+
+    def _valid_currency_key(self, currency):
+        return check_valid_currency_key(currency)
+
+    def _valid_currency_value(self, value):
+        return check_valid_currency_value(value)

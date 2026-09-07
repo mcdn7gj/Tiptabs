@@ -23,5 +23,5 @@ services:
       restart_policy:
         condition: on-failure
 
-  networks:
-    net:
+networks:
+  net:
