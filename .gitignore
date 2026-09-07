@@ -37,3 +37,9 @@ Temporary Items
 */__pycache__/
 *.egg-info*
 env/
+
+AGENTS.md
+.github/skills
+.specify/
+specs/
+docs/

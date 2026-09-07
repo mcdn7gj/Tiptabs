@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [*]
+    branches: ['*']
   pull_request:
-    branches: [*]
+    branches: ['*']
 
 jobs:
   test:
@@ -53,8 +53,7 @@ jobs:
 
       - name: Verify
         run: |
-          docker build -t tiptabs:test .
-          docker run --rm -d --name tiptabs-test -p 5000:5000 tiptabs:test
+          docker run --rm -d --name tiptabs-test -p 5000:5000 tiptabs:latest
           sleep 5
           curl -f http://localhost:5000/health
           docker stop tiptabs-test
